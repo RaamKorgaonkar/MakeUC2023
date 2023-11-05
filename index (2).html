@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EcoLog</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #000;
+        }
+
+        #container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.2);
+            text-align: center;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        input[type="range"], input[type="number"] {
+            width: 100%;
+            background-color: #f2f2f2;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        button {
+            display: block;
+            margin: 0 auto;
+            background-color: #00796b;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #005c52;
+        }
+
+        #results {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #00796b;
+        }
+
+        h2 {
+            color: #00796b;
+        }
+
+        #commonDate, label {
+            background-color: #f2f2f2;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .challenges {
+            text-align: left;
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .challenge-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .challenge-label {
+            margin-right: 10px;
+        }
+
+        #earthPointsChart {
+            margin: 20px 0;
+        }
+
+        #logTable {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1 style="text-align:center;">EcoLog</h1>
+        <p>Your digital diary to a greener world</p>
+
+        <label for="commonDate">Date:</label>
+        <input type="date" id="commonDate" value="">
+
+        <h2>Transport Tracker</h2>
+        <table>
+            <tr>
+                <th>Type</th>
+                <th>Slider</th>
+                <th>Hours from 0-24</th>
+            </tr>
+            <tr>
+                <td>Walking/Bicycling</td>
+                <td>
+                    <input type="range" id="walkingHours" min="0" max="24" step="0.5" value="0">
+                </td>
+                <td>
+                    <span id="walkingHoursValue">0</span> hours
+                </td>
+            </tr>
+            <tr>
+                <td>Public Transport (Hours)</td>
+                <td>
+                    <input type="range" id="publicTransportHours" min="0" max="24" step="0.5" value="0">
+                </td>
+                <td>
+                    <span id="publicTransportHoursValue">0</span> hours
+                </td>
+            </tr>
+            <tr>
+                <td>Private Vehicles</td>
+                <td>
+                    <input type="range" id="privateVehicleHours" min="0" max="24" step="0.5" value="0">
+                </td>
+                <td>
+                    <span id="privateVehicleHoursValue">0</span> hours
+                </td>
+            </tr>
+        </table>
+
+        <h2>Energy Tracker</h2>
+        <table>
+            <tr>
+                <th>Type</th>
+                <th>Slider</th>
+                <th>Energy Consumption (kWh)</th>
+            </tr>
+            <tr>
+                <td>Daily Consumption</td>
+                <td>
+                    <input type="range" id="dailyEnergyConsumption" min="0" max="1000" step="1" value="1">
+                </td>
+                <td>
+                    <span id="energyConsumptionValue">0</span> kWh
+                </td>
+            </tr>
+        </table>
+
+        <h2>Food Tracker</h2>
+        <table>
+            <tr>
+                <th>Type</th>
+                <th>Red Meat Consumed</th>
+                <th>Meat Consumed</th>
+                <th>Vegetarian</th>
+                <th>Vegan</th>
+            </tr>
+            <tr>
+                <td>Meals</td>
+                <td>
+                    <input type="checkbox" id="redMeatBreakfast" value="redMeat" onchange="calculateFoodPoints()">
+                </td>
+                <td>
+                    <input type="checkbox" id="meatBreakfast" value="meat" onchange="calculateFoodPoints()">
+                </td>
+                <td>
+                    <input type="checkbox" id="vegetarianBreakfast" value="vegetarian" onchange="calculateFoodPoints()">
+                </td>
+                <td>
+                    <input type="checkbox" id="veganBreakfast" value="vegan" onchange="calculateFoodPoints()">
+                </td>
+            </tr>
+        </table>
+
+        <button onclick="calculateEarthPoints()">Calculate Earth Points</button>
+
+        <div id="results">
+            <h2>Earth Points for the Day:</h2>
+            <p id="earthPoints">0</p>
+        </div>
+
+        <div class="challenges">
+            <h2>Monthly Challenges:</h2>
+            <div class="challenge-item">
+                <label class="challenge-label">GreenGardeningNovember: Grow your own herbs, vegetables, or plants.</label>
+                <input type="checkbox" id="challenge1" onchange="hideChallenge(this)">
+            </div>
+        </div>
+
+        <canvas id="earthPointsChart"></canvas>
+
+        <div id="logTable">
+            <h2>Log:</h2>
+            <table id="log">
+                <tr>
+                    <th>Date</th>
+                    <th>Earth Points</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let totalEarthPoints = 0;
+        let totalEnergyConsumption = 1;
+
+        function calculateEarthPoints() {
+            const walkingHours = parseFloat(document.getElementById('walkingHours').value);
+            const publicTransportHours = parseFloat(document.getElementById('publicTransportHours').value);
+            const privateVehicleHours = parseFloat(document.getElementById('privateVehicleHours').value);
+            const totalHours = walkingHours + publicTransportHours + privateVehicleHours;
+
+            const walkingPoints = (100 * walkingHours) / totalHours;
+            const publicTransportPoints = (75 * publicTransportHours) / totalHours;
+            const privateVehiclePoints = -(25 * privateVehicleHours) / totalHours;
+
+            let energyPoints = 0;
+            totalEnergyConsumption = parseFloat(document.getElementById('dailyEnergyConsumption').value);
+            energyPoints = (25 / totalEnergyConsumption) * 100;
+
+            let foodPoints = 0;
+            const redMeatChecked = document.getElementById('redMeatBreakfast').checked;
+            const meatChecked = document.getElementById('meatBreakfast').checked;
+            const vegetarianChecked = document.getElementById('vegetarianBreakfast').checked;
+            const veganChecked = document.getElementById('veganBreakfast').checked;
+
+            if (redMeatChecked) {
+                foodPoints -= 40;
+            }
+            if (meatChecked) {
+                foodPoints -= 20;
+            }
+            if (vegetarianChecked) {
+                foodPoints += 50;
+            }
+            if (veganChecked) {
+                foodPoints += 50;
+            }
+
+            const earthPoints = (((walkingPoints + publicTransportPoints + privateVehiclePoints) / 3) + energyPoints + foodPoints) / 3;
+
+            totalEarthPoints = earthPoints;
+
+            earthPointsData.datasets[0].data.push(totalEarthPoints);
+            earthPointsData.datasets[0].data.shift();
+            earthPointsChart.update();
+
+            document.getElementById('earthPoints').textContent = totalEarthPoints.toFixed(2);
+
+            const logTable = document.getElementById('log');
+            const logRow = logTable.insertRow(1);
+            const logDateCell = logRow.insertCell(0);
+            const logPointsCell = logRow.insertCell(1);
+
+            const currentDate = new Date();
+            const logDate = currentDate.toDateString();
+            logDateCell.textContent = logDate;
+            logPointsCell.textContent = totalEarthPoints.toFixed(2);
+        }
+
+        function hideChallenge(checkbox) {
+            const challengeDiv = checkbox.parentElement.parentElement;
+            if (checkbox.checked) {
+                challengeDiv.style.display = 'none';
+            } else {
+                challengeDiv.style.display = 'flex';
+            }
+        }
+
+        document.getElementById('walkingHours').addEventListener('input', function() {
+            document.getElementById('walkingHoursValue').textContent = this.value;
+        });
+
+        document.getElementById('publicTransportHours').addEventListener('input', function() {
+            document.getElementById('publicTransportHoursValue').textContent = this.value;
+        });
+
+        document.getElementById('privateVehicleHours').addEventListener('input', function() {
+            document.getElementById('privateVehicleHoursValue').textContent = this.value;
+        });
+
+        document.getElementById('dailyEnergyConsumption').addEventListener('input', function() {
+            document.getElementById('energyConsumptionValue').textContent = this.value;
+        });
+
+        const earthPointsData = {
+            labels: [
+                'Day 7',
+                'Day 6',
+                'Day 5',
+                'Day 4',
+                'Day 3',
+                'Day 2',
+                'Day 1',
+            ],
+            datasets: [{
+                label: 'Earth Points',
+                data: [0, 0, 0, 0, 0, 0, 0],
+                backgroundColor: 'rgba(0, 121, 107, 0.5)',
+                borderColor: 'rgba(0, 121, 107, 1)',
+                borderWidth: 1,
+            }]
+        };
+
+        const earthPointsChart = new Chart(document.getElementById('earthPointsChart'), {
+            type: 'bar',
+            data: earthPointsData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                    },
+                },
+            },
+        });
+    </script>
+</body>
+</html>
